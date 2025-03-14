@@ -44,7 +44,7 @@
             </button>
         </div>
         <table class="table table-striped table-hover text-center">
-            <thead id="trxDetailHdr">
+            <thead id="trxDetailHdr" v-bind:style="{ display: hasError ? 'none' : '' }">
                 <tr>
                     <!-- <th class="listTable1" style="background-color: rgb(66, 177, 202);"><input type="checkbox" name="chkAll" id="chkAll"></th> -->
                     <th class="listTable1" style="background-color: rgb(66, 177, 202);">Branch</th>
@@ -97,6 +97,7 @@ export default {
     },
     data() {
         return {
+            hasError: false,
             turnOffLoading: false,
             listdata: [],
             currencyMap: {
@@ -127,13 +128,15 @@ export default {
             if(data.transaction === undefined && data.errors != undefined){
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
-                toastr.error(data.errors[0].detail, "Error");
+                toastr.error(data.errors[0].detail, "Error - List");
+                this.hasError = true;
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
             }else{
                 this.listdata = data.transaction;
-                console.log(this.listdata);
+                this.hasError = false;
+                // console.log(this.listdata);
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
@@ -143,7 +146,8 @@ export default {
             console.log(err);
             toastr.options.closeButton = true;
             toastr.options.progressBar = true;
-            toastr.error(err, "Error");
+            toastr.error(err, "Error - List");
+            this.hasError = true;
             this.$nextTick(() => {
                 this.turnOffLoading = true;
             });

@@ -1,6 +1,6 @@
 <template>
     <div id="pie-container" class="text-center">
-        <h1>Transaction Statistics</h1>
+        <h1 v-bind:style="{ display: hasError ? 'none' : 'block' }">Transaction Statistics</h1>
         <svg id="pie-chart"></svg>
         <div id="tooltip" class="tooltip-chart"></div>
       </div>
@@ -10,6 +10,7 @@
 export default {
     data() {
         return {
+            // turnOffLoading: false,
             pieUrl:
                 "https://api.sheety.co/8f2d0776cec55794d25d35becbdcfc1d/appData/transaction",
             pieData: [],
@@ -20,21 +21,56 @@ export default {
             pieWidth: 500,
             pieHeight: 500,
             pieRadius: 240,
+            hasError: false,
         };
     },
     mounted(){
         this.fetchData();
     },
     methods: {
-        async fetchData() {
+        // async fetchData() {
+        fetchData() {
             try {
-                const response = await fetch(this.pieUrl);
-                const data = await response.json();
+                // const response = await fetch(this.pieUrl);
+                // const data = await response.json();
                 //this.pieData = data.transaction;
-                this.pieData = this.groupByCifName(data.transaction);
-                this.drawChart();
+                fetch(this.pieUrl,
+                {
+                    headers: {
+                    Authorization: "Bearer thisisasecretkeyforthisapi",
+                    "Content-Type": "application/json",
+                    },
+                }
+                )
+                .then((response) => response.json())
+                .then((data) => {
+                    if(data.transaction === undefined && data.errors != undefined){
+                        toastr.options.closeButton = true;
+                        toastr.options.progressBar = true;
+                        toastr.error(data.errors[0].detail, "Error - Pie Chart");
+                        this.hasError = true;
+                        // this.$nextTick(() => {
+                        //     this.turnOffLoading = true;
+                        // });
+                    }else{
+                        this.hasError = false;
+                        this.pieData = this.groupByCifName(data.transaction);
+                        this.drawChart();
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toastr.options.closeButton = true;
+                    toastr.options.progressBar = true;
+                    toastr.error(err, "Error - Pie Chart");
+                    this.hasError = true;
+                    this.$nextTick(() => {
+                        this.turnOffLoading = true;
+                    });
+                });
             } catch (error) {
                 console.error("Error fetching data:", error);
+                this.hasError = true;
             }
         },
         groupByCifName(data) {
