@@ -81,16 +81,19 @@
             </tbody>
         </table>
       </div>
+      <PieChart />
 </template>
 <script>
 import SubHeader from './Header.vue';
 import LoadingOverlay from './LoadingOverlay.vue';
+import PieChart from './PieChart.vue';
 
 export default {
     name: 'List',
     components: {
       SubHeader,
-      LoadingOverlay
+      LoadingOverlay,
+      PieChart
     },
     data() {
         return {

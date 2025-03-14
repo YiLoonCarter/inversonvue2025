@@ -450,16 +450,17 @@ export default {
             // alert("Saving transaction...");
             const data = {
               transaction: {
-                lcType: lcType,
-                docIndex: docIndex,
-                appDate: appDate,
-                appRcpDate: appRcpDate,
-                issDate: issDate,
-                expDate: expDate,
-                currType: currType,
-                lcAmt: lcAmt,
+                lcType: this.lcType,
+                docIndex: this.docIndex,
+                appDate: this.appDate,
+                appRcpDate: this.appRcpDate,
+                issDate: this.issDate,
+                expDate: this.expDate,
+                currType: this.currType,
+                lcAmt: this.lcAmt,
               },
             };
+            console.log(data);
             this.fetchPut(data, this.gTrxId);
         },
         addTransaction() {
@@ -501,20 +502,20 @@ export default {
             // alert("Copying transaction...");
             const data = {
               transaction: {
-                refNo: refNo,
-                cifNo: cifNo,
-                cifName: cifName,
-                srcBrn: srcBrn,
-                prcBrn: prcBrn,
-                refType: refType,
-                lcType: lcType,
-                docIndex: docIndex,
-                appDate: appDate,
-                appRcpDate: appRcpDate,
-                issDate: issDate,
-                expDate: expDate,
-                currType: currType,
-                lcAmt: lcAmt,
+                refNo: this.refNo,
+                cifNo: this.cifNo,
+                cifName: this.cifName,
+                srcBrn: this.srcBrn,
+                prcBrn: this.prcBrn,
+                refType: this.refType,
+                lcType: this.lcType,
+                docIndex: this.docIndex,
+                appDate: this.appDate,
+                appRcpDate: this.appRcpDate,
+                issDate: this.issDate,
+                expDate: this.expDate,
+                currType: this.currType,
+                lcAmt: this.lcAmt,
                 trxStatus: "NewReg",
               },
             };
