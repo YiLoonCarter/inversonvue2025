@@ -404,7 +404,18 @@ export default {
             });
         }
     },
+    mounted() {
+      this.initBootstrapTooltips();
+    },
     methods: {
+        initBootstrapTooltips() {
+          const tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+          );
+          tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+          });
+        },
         hideFab() {
             this.isFabHidden = true;
             this.isHideFab = true;

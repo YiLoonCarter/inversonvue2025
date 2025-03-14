@@ -198,10 +198,19 @@ export default {
         },
         getStatusDesc(code) {
             return this.statusMap[code] || code; // Fallback to code if no mapping found
-        }
+        },
+        initBootstrapTooltips() {
+          const tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+          );
+          tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+          });
+        },
     },
     mounted() {
-      // Set turnOffLoading to true once the component is fully mounted
+        this.initBootstrapTooltips();
+    // Set turnOffLoading to true once the component is fully mounted
     //   this.$nextTick(() => {
     //     this.turnOffLoading = true;
     //     console.log("turnOffLoading set to:", this.turnOffLoading);
