@@ -248,7 +248,15 @@ export default {
           { id: "btn_Copy", title: "Copy", icon: "fa-solid fa-copy fa-xl", href: "#", allowedRoles: ["admin"] },
           { id: "btn_Apr", title: "Approve", icon: "fa-solid fa-circle-check fa-xl", href: "#", showIfStatus: "pending" },
           { id: "btn_Del", title: "Delete", icon: "fa-solid fa-trash fa-xl", href: "#", allowedRoles: ["admin"], hideIfStatus: "approved" }
-        ]
+        ],
+        modeMap: {
+          inq: "Inquiry",
+          new: "Add",
+          edt: "Update",
+          cpy: "Copy",
+          apr: "Approval",
+          del: "Delete"
+        },
       };
     },
     computed: {
@@ -312,11 +320,11 @@ export default {
         }
     },
     created() {
-        console.log('Received trxId:', this.trxId);
+        // console.log('Received trxId:', this.trxId);
         // console.log('Received mode:', this.mode);
 
         if (this.trxId != 0) {
-          console.log('trigger GET method');
+          // console.log('trigger GET method');
             fetch(
                 "https://api.sheety.co/8f2d0776cec55794d25d35becbdcfc1d/appData/transaction/" +
                 this.trxId,
@@ -332,7 +340,7 @@ export default {
               if(data.transaction === undefined && data.errors != undefined){
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
-                toastr.error(data.errors[0].detail, "Error");
+                toastr.error(data.errors[0].detail, "Error - Form - " + this.getModeDesc(this.mode));
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
@@ -383,7 +391,7 @@ export default {
             .catch((err) => {
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
-                toastr.error(err, "Error");
+                toastr.error(err, "Error - Form - " + this.getModeDesc(this.mode));
                 this.$nextTick(() => {
                   this.turnOffLoading = true;
                 });
@@ -404,6 +412,9 @@ export default {
         showFab() {
             this.isFabHidden = false;
             this.isHideFab = false;
+        },
+        getModeDesc(code) {
+            return this.modeMap[code] || code; // Fallback to code if no mapping found
         },
         handleButtonClick(buttonId) {
           console.log("button id clicked : " + buttonId);
@@ -539,7 +550,7 @@ export default {
               if(data.transaction === undefined && data.errors != undefined){
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
-                toastr.error(data.errors[0].detail, "Error");
+                toastr.error(data.errors[0].detail, "Error - Form - " + this.getModeDesc(this.mode));
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
@@ -557,7 +568,7 @@ export default {
               console.log(err);
               toastr.options.closeButton = true;
               toastr.options.progressBar = true;
-              toastr.error(err, "Error");
+              toastr.error(err, "Error - Form - " + this.getModeDesc(this.mode));
               this.$nextTick(() => {
                 this.turnOffLoading = true;
             });
@@ -581,7 +592,7 @@ export default {
             if(data.transaction === undefined && data.errors != undefined){
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
-                toastr.error(data.errors[0].detail, "Error");
+                toastr.error(data.errors[0].detail, "Error - Form - " + this.getModeDesc(this.mode));
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
@@ -608,7 +619,7 @@ export default {
             console.log(err);
             toastr.options.closeButton = true;
             toastr.options.progressBar = true;
-            toastr.error(err, "Error");
+            toastr.error(err, "Error - Form - " + this.getModeDesc(this.mode));
             this.$nextTick(() => {
                 this.turnOffLoading = true;
             });
@@ -632,7 +643,7 @@ export default {
             if(data.transaction === undefined && data.errors != undefined){
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
-                toastr.error(data.errors[0].detail, "Error");
+                toastr.error(data.errors[0].detail, "Error - Form - " + this.getModeDesc(this.mode));
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
@@ -659,7 +670,7 @@ export default {
             console.log(err);
             toastr.options.closeButton = true;
             toastr.options.progressBar = true;
-            toastr.error(err, "Error");
+            toastr.error(err, "Error - Form - " + this.getModeDesc(this.mode));
             this.$nextTick(() => {
                 this.turnOffLoading = true;
             });
