@@ -1,4 +1,5 @@
-<template>
+<template>  
+  <!-- <LoadingOverlay :isLoadVisible=false /> -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-bgcolor">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Trade Finance Backoffice</a>
@@ -43,8 +44,12 @@
   </template>
   
   <script>
+  import LoadingOverlay from './LoadingOverlay.vue';
 
   export default {
+    components: {
+      LoadingOverlay
+    },   
     data() {
       return {
         isNavOpen: false, // Track Navbar open/close

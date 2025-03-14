@@ -1,4 +1,5 @@
 <template>
+    <LoadingOverlay :isLoadVisible=turnOffLoading />  
      <SubHeader />
      <div class="container py-3 bg-light">
         <div class="topMenu mb-3">
@@ -138,7 +139,9 @@
             :style="`--index: ${index + 1};`"
         >
             <a :href="button.href" data-bs-toggle="tooltip" 
-            :title="button.title" :id="button.id" data-bs-placement="left">
+            :title="button.title" :id="button.id" 
+            data-bs-placement="left"
+            @click.prevent="handleButtonClick(button.id)">
                 <i :class="button.icon" aria-hidden="true"></i>
             </a>
         </div>
@@ -176,8 +179,6 @@
             <i class="fa-solid fa-trash fa-xl" aria-hidden="true"></i>
           </a>
         </div> -->
-
-
     </div>
 
       <button id="show-fab" :class="{ visible: isFabHidden }" @click="showFab">
@@ -191,6 +192,7 @@
 </template>
 <script>
 import SubHeader from './Header.vue';
+import LoadingOverlay from './LoadingOverlay.vue';
 
 export default {
     name: 'UserForm',
@@ -200,7 +202,8 @@ export default {
     },
     // props: ['trxId', 'mode'],
     components: {
-      SubHeader
+      SubHeader,
+      LoadingOverlay
     },
     data() {
     return {
@@ -237,6 +240,7 @@ export default {
         lcAmt: "8000.00",
         isFabHidden: false, // Track FAB visibility
         isHideFab: false,
+        turnOffLoading: false,
         buttons: [
           { id: "btn_Back", title: "Back", icon: "fa-solid fa-arrow-left fa-xl", href: "#", alwaysShow: true },
           { id: "btn_Add", title: "Add", icon: "fa-solid fa-square-plus fa-xl", href: "#", allowedRoles: ["admin", "editor"] },
@@ -273,15 +277,46 @@ export default {
                     }
                 }
 
+                if(this.mode == 'edt') {
+                    if(button.id != 'btn_Back' && button.id != 'btn_Save'){
+                        return false;
+                    }
+                }
+
+                if(this.mode == 'new') {
+                    if(button.id != 'btn_Back' && button.id != 'btn_Add'){
+                        return false;
+                    }
+                }
+
+                if(this.mode == 'cpy') {
+                    if(button.id != 'btn_Back' && button.id != 'btn_Copy'){
+                        return false;
+                    }
+                }
+
+                if(this.mode == 'apr') {
+                    if(button.id != 'btn_Back' && button.id != 'btn_Apr'){
+                        return false;
+                    }
+                }
+
+                if(this.mode == 'del') {
+                    if(button.id != 'btn_Back' && button.id != 'btn_Del'){
+                        return false;
+                    }
+                }
+
                 return true;
             });
         }
     },
     created() {
         console.log('Received trxId:', this.trxId);
-        console.log('Received mode:', this.mode);
+        // console.log('Received mode:', this.mode);
 
-        if (this.trxId !== null) {
+        if (this.trxId != 0) {
+          console.log('trigger GET method');
             fetch(
                 "https://api.sheety.co/8f2d0776cec55794d25d35becbdcfc1d/appData/transaction/" +
                 this.trxId,
@@ -294,6 +329,14 @@ export default {
             )
             .then((response) => response.json())
             .then((data) => {
+              if(data.transaction === undefined && data.errors != undefined){
+                toastr.options.closeButton = true;
+                toastr.options.progressBar = true;
+                toastr.error(data.errors[0].detail, "Error");
+                this.$nextTick(() => {
+                    this.turnOffLoading = true;
+                });
+              }else{
                 console.log(data.transaction);
                 const dataset = data.transaction;
 
@@ -332,15 +375,25 @@ export default {
                 this.expDate = dataset.expDate;
                 this.currType = dataset.currType;
                 this.lcAmt = dataset.lcAmt;
+                this.$nextTick(() => {
+                  this.turnOffLoading = true;
+                });
+              }
             })
             .catch((err) => {
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
                 toastr.error(err, "Error");
+                this.$nextTick(() => {
+                  this.turnOffLoading = true;
+                });
                 //document.getElementById("loading-overlay").style.display = "none";
             });
         } else {
             //document.getElementById("loading-overlay").style.display = "none";
+            this.$nextTick(() => {
+              this.turnOffLoading = true;
+            });
         }
     },
     methods: {
@@ -352,6 +405,266 @@ export default {
             this.isFabHidden = false;
             this.isHideFab = false;
         },
+        handleButtonClick(buttonId) {
+          console.log("button id clicked : " + buttonId);
+          this.$nextTick(() => {
+            this.turnOffLoading = false;
+          });
+          switch (buttonId) {
+              case 'btn_Back':
+                  // console.log("Back button clicked");
+                  // this.$router.go(-1);
+                  toastr.options.closeButton = true;
+                  toastr.options.progressBar = true;
+                  toastr.info("Redirect back to List", "Info");
+                  this.$router.push({ 
+                    name: 'list', 
+                  });
+                  break;
+              case 'btn_Save':
+                  // console.log("Save button clicked");
+                  this.saveTransaction();
+                  break;
+              case 'btn_Add':
+                  // console.log("Add button clicked");
+                  this.addTransaction();
+                  break;
+              case 'btn_Apr':
+                  // console.log("Approve button clicked");
+                  this.approveTransaction();
+                  break;
+              case 'btn_Copy':
+                  // console.log("Copy button clicked");
+                  this.copyTransaction();
+                  break;
+              case 'btn_Del':
+                  // console.log("Delete button clicked");
+                  this.deleteTransaction();
+                  break;
+              default:
+                  // console.log("Unknown button clicked");
+          }
+        },
+        saveTransaction() {
+            // Add logic for saving a transaction
+            // alert("Saving transaction...");
+            const data = {
+              transaction: {
+                lcType: lcType,
+                docIndex: docIndex,
+                appDate: appDate,
+                appRcpDate: appRcpDate,
+                issDate: issDate,
+                expDate: expDate,
+                currType: currType,
+                lcAmt: lcAmt,
+              },
+            };
+            this.fetchPut(data, this.gTrxId);
+        },
+        addTransaction() {
+            // Add logic for adding a transaction
+            // alert("Adding new transaction...");
+            const data = {
+              transaction: {
+                refNo: this.refNo,
+                cifNo: this.cifNo,
+                cifName: this.cifName,
+                srcBrn: this.srcBrn,
+                prcBrn: this.prcBrn,
+                refType: this.refType,
+                lcType: this.lcType,
+                docIndex: this.docIndex,
+                appDate: this.appDate,
+                appRcpDate: this.appRcpDate,
+                issDate: this.issDate,
+                expDate: this.expDate,
+                currType: this.currType,
+                lcAmt: this.lcAmt,
+                trxStatus: "NewReg",
+              },
+            };
+            this.fetchPost(data);
+        },
+        approveTransaction() {
+            // Add logic for approving a transaction
+            // alert("Approving transaction...");
+            const data = {
+              transaction: {
+                trxStatus: "FullApp",
+              },
+            };
+            this.fetchPut(data, this.gTrxId);
+        },
+        copyTransaction() {
+            // Add logic for copying a transaction
+            // alert("Copying transaction...");
+            const data = {
+              transaction: {
+                refNo: refNo,
+                cifNo: cifNo,
+                cifName: cifName,
+                srcBrn: srcBrn,
+                prcBrn: prcBrn,
+                refType: refType,
+                lcType: lcType,
+                docIndex: docIndex,
+                appDate: appDate,
+                appRcpDate: appRcpDate,
+                issDate: issDate,
+                expDate: expDate,
+                currType: currType,
+                lcAmt: lcAmt,
+                trxStatus: "NewReg",
+              },
+            };
+            this.fetchPost(data);
+        },
+        deleteTransaction() {
+            // Add logic for deleting a transaction
+            // alert("Deleting transaction...");
+            fetch(
+            "https://api.sheety.co/8f2d0776cec55794d25d35becbdcfc1d/appData/transaction/" +
+            this.gTrxId,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: "Bearer thisisasecretkeyforthisapi",
+                "Content-Type": "application/json",
+              },
+            }
+            )
+            .then(() => {
+              if(data.transaction === undefined && data.errors != undefined){
+                toastr.options.closeButton = true;
+                toastr.options.progressBar = true;
+                toastr.error(data.errors[0].detail, "Error");
+                this.$nextTick(() => {
+                    this.turnOffLoading = true;
+                });
+              }else{
+                toastr.options.closeButton = true;
+                toastr.options.progressBar = true;
+                toastr.success("Record successfully deleted", "Info");
+                toastr.info("Redirect back to List", "Info");
+                this.$router.push({ 
+                  name: 'list', 
+                });
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              toastr.options.closeButton = true;
+              toastr.options.progressBar = true;
+              toastr.error(err, "Error");
+              this.$nextTick(() => {
+                this.turnOffLoading = true;
+            });
+            });
+        },
+        fetchPut(putData, puttrxId){
+          fetch(
+          "https://api.sheety.co/8f2d0776cec55794d25d35becbdcfc1d/appData/transaction/" +
+          puttrxId,
+          {
+            method: "PUT",
+            body: JSON.stringify(putData),
+            headers: {
+              Authorization: "Bearer thisisasecretkeyforthisapi",
+              "Content-Type": "application/json",
+            },
+          }
+          )
+          .then((response) => response.json())
+          .then((data) => {
+            if(data.transaction === undefined && data.errors != undefined){
+                toastr.options.closeButton = true;
+                toastr.options.progressBar = true;
+                toastr.error(data.errors[0].detail, "Error");
+                this.$nextTick(() => {
+                    this.turnOffLoading = true;
+                });
+            }else{
+              toastr.options.closeButton = true;
+              toastr.options.progressBar = true;
+              switch(this.gMode){
+                case "edt":
+                  toastr.success("Record successfully updated", "Info");
+                  break;
+                case "apr":
+                  toastr.success("Record successfully approved", "Info");
+                  break;
+              }
+              toastr.info("Redirect back to List", "Info");
+              this.$router.push({ 
+                name: 'list', 
+              });
+            }
+            // document.location.href = "/list.html";
+            // document.getElementById("loading-overlay").style.display = "none";
+          })
+          .catch((err) => {
+            console.log(err);
+            toastr.options.closeButton = true;
+            toastr.options.progressBar = true;
+            toastr.error(err, "Error");
+            this.$nextTick(() => {
+                this.turnOffLoading = true;
+            });
+            // document.getElementById("loading-overlay").style.display = "none";
+          });
+        },
+        fetchPost(postData){
+          fetch(
+          "https://api.sheety.co/8f2d0776cec55794d25d35becbdcfc1d/appData/transaction/",
+          {
+            method: "POST",
+            body: JSON.stringify(postData),
+            headers: {
+              Authorization: "Bearer thisisasecretkeyforthisapi",
+              "Content-Type": "application/json",
+            },
+          }
+          )
+          .then((response) => response.json())
+          .then((data) => {
+            if(data.transaction === undefined && data.errors != undefined){
+                toastr.options.closeButton = true;
+                toastr.options.progressBar = true;
+                toastr.error(data.errors[0].detail, "Error");
+                this.$nextTick(() => {
+                    this.turnOffLoading = true;
+                });
+            }else{
+              toastr.options.closeButton = true;
+              toastr.options.progressBar = true;
+              switch(this.gMode){
+                case "new":
+                  toastr.success("Record successfully added", "Info");
+                  break;
+                case "cpy":
+                  toastr.success("Record successfully copied", "Info");
+                  break;
+              }              
+              toastr.info("Redirect back to List", "Info");
+              this.$router.push({ 
+                name: 'list', 
+              });
+            }
+            // document.location.href = "/list.html";
+            // document.getElementById("loading-overlay").style.display = "none";
+          })
+          .catch((err) => {
+            console.log(err);
+            toastr.options.closeButton = true;
+            toastr.options.progressBar = true;
+            toastr.error(err, "Error");
+            this.$nextTick(() => {
+                this.turnOffLoading = true;
+            });
+            // document.getElementById("loading-overlay").style.display = "none";
+          });
+        }
     },
 }
 </script>

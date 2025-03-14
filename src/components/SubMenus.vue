@@ -1,4 +1,5 @@
 <template>
+  <LoadingOverlay :isLoadVisible=turnOffLoading />  
   <SubHeader />
   <div class="container py-3">
     <div class="topMenu">
@@ -10,7 +11,8 @@
     <!-- Loop through grouped subMenuItems (2 items per row) -->
     <div v-for="(row, rowIndex) in groupedSubMenuItems" :key="rowIndex" class="row">
       <div v-for="(item, index) in row" :key="index" class="col-md-6 col-sm-12 py-2">
-        <img :src="actionForwardImg" class="img-fluid">
+        <!-- <img :src="actionForwardImg" class="img-fluid"> -->
+        <img src="@/assets/action_forward.jpg" class="img-fluid">
         <span><router-link to="/list">{{ item.title }}</router-link></span>
         <!-- <span><a :href="item.url">{{ item.title }}</a></span> -->
       </div>
@@ -21,16 +23,19 @@
 <script>
 import SubHeader from './Header.vue';
 // const actionForwardImg = new URL('@/assets/action_forward.jpg', import.meta.url).href;
-import actionForwardImg from '../assets/action_forward.jpg'
+// import actionForwardImg from '../assets/action_forward.jpg'
+import LoadingOverlay from './LoadingOverlay.vue';
 
 export default {
     name: 'SubMenus',
     components: {
-      SubHeader
+      SubHeader,
+      LoadingOverlay
     },   
     data() {
       return {
-        actionForwardImg,
+        turnOffLoading: false,
+        // actionForwardImg,
         subMenuItems: [
           { title: "Registation", url: "/list" },
           { title: "Collect Margin", url: "#" },
@@ -55,6 +60,13 @@ export default {
       }
       return groups;
     }
+  },
+  mounted() {
+      // Set turnOffLoading to true once the component is fully mounted
+      this.$nextTick(() => {
+        this.turnOffLoading = true;
+        console.log("turnOffLoading set to:", this.turnOffLoading);
+      });
   }
 }
 </script>

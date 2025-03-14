@@ -1,4 +1,5 @@
 <template>
+    <LoadingOverlay :isLoadVisible=turnOffLoading /> 
     <SubHeader />
     <div class="container py-3">
         <div class="topMenu mb-3">
@@ -83,14 +84,17 @@
 </template>
 <script>
 import SubHeader from './Header.vue';
+import LoadingOverlay from './LoadingOverlay.vue';
 
 export default {
     name: 'List',
     components: {
-      SubHeader
+      SubHeader,
+      LoadingOverlay
     },
     data() {
         return {
+            turnOffLoading: false,
             listdata: [],
             currencyMap: {
                 USD: "USD - US Dollar",
@@ -121,9 +125,15 @@ export default {
                 toastr.options.closeButton = true;
                 toastr.options.progressBar = true;
                 toastr.error(data.errors[0].detail, "Error");
+                this.$nextTick(() => {
+                    this.turnOffLoading = true;
+                });
             }else{
                 this.listdata = data.transaction;
                 console.log(this.listdata);
+                this.$nextTick(() => {
+                    this.turnOffLoading = true;
+                });
             } 
         })
         .catch((err) => {
@@ -131,17 +141,47 @@ export default {
             toastr.options.closeButton = true;
             toastr.options.progressBar = true;
             toastr.error(err, "Error");
+            this.$nextTick(() => {
+                this.turnOffLoading = true;
+            });
         });
 
     },
     methods: {
         goToUserForm(trxId, mode) {
+            let modeDesc = "";
+            toastr.options.closeButton = true;
+            toastr.options.progressBar = true;
+            switch(mode){
+                case "new":
+                    modeDesc = "Adding a new record";
+                    break;
+                case "edt":
+                    modeDesc = "Editing record";
+                    break;
+                case "cpy":
+                    modeDesc = "Copying record";
+                    break;
+                case "inq":
+                    modeDesc = "Inquiry record detail";
+                    break;
+                case "apr":
+                    modeDesc = "Approving record";
+                    break;
+                case "del":
+                    modeDesc = "Deleting record";
+                    break;
+            }
+            toastr.info(modeDesc, "Info");
             this.$router.push({ 
                 name: 'UserForm', 
                 params: { trxId, mode } 
             });
         },
         goToSubMenu() {
+            toastr.options.closeButton = true;
+            toastr.options.progressBar = true;
+            toastr.info("Redirect back to Sub Menu", "Info");
             this.$router.push({ 
                 name: 'home', 
             });
@@ -152,6 +192,13 @@ export default {
         getStatusDesc(code) {
             return this.statusMap[code] || code; // Fallback to code if no mapping found
         }
+    },
+    mounted() {
+      // Set turnOffLoading to true once the component is fully mounted
+    //   this.$nextTick(() => {
+    //     this.turnOffLoading = true;
+    //     console.log("turnOffLoading set to:", this.turnOffLoading);
+    //   });
     }
 }
 </script>
