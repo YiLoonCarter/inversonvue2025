@@ -6,9 +6,9 @@
             <h2>Letter of Credit Registation Search</h2>
         </div>
         <div class="mb-3">
-            <label for="regView">View</label>
-            <select name="regView" id="regView" class="form-select">
-                <option value="#">All Registration</option>
+            <label for="trxStatus">View</label>
+            <select name="trxStatus" id="trxStatus" v-model="filter.trxStatus" class="form-select">
+                <option value="">All Registration</option>
                 <option value="NewReg">New Registration</option>
                 <option value="FullApp">Fully Approved</option>
                 <option value="RegCan">Registration Cancelled</option>
@@ -16,7 +16,8 @@
         </div>
         <div class="mb-3">
             <label for="srcBrn">Source Branch</label>
-            <select name="srcBrn" id="srcBrn" class="form-select">
+            <select name="srcBrn" id="srcBrn" v-model="filter.srcBrn" class="form-select">
+                <option value="">All Branches</option>
                 <option value="1000">1000 - Kuala Lumpur</option>
                 <option value="1001">1001 - Kepong</option>
                 <option value="1002">1002 - Bandar Utama</option>
@@ -25,21 +26,22 @@
         </div>
         <div class="mb-3">
             <label for="refNo">Reference Number</label>
-            <input type="text" name="refNo" id="refNo" class="form-control">
+            <input type="text" name="refNo" id="refNo" v-model="filter.refNo" class="form-control">
         </div>
         <div class="mb-3">
             <button id="btn_Back" style="border: none;background-color: transparent;" 
             data-bs-toggle="tooltip" title="Back" data-bs-placement="top"
-            @click="goToSubMenu()">
+            @click="goToSubMenu(); hideTooltip('btn_Back')" @mouseover="hideTooltip('btn_Back')">
               <i class="fa-solid fa-arrow-left fa-2xl" style="color: rgb(55, 175, 202);"></i>
             </button>
             <button id="btn_Search" style="border: none;background-color: transparent;" 
-            data-bs-toggle="tooltip" title="Search" data-bs-placement="top">
+            data-bs-toggle="tooltip" title="Search" data-bs-placement="top"
+            @click="applyFilter(); hideTooltip('btn_Search')" @mouseover="hideTooltip('btn_Search')">
               <i class="fa-solid fa-magnifying-glass fa-2xl" style="color: rgb(55, 175, 202);"></i>
             </button>
             <button id="btn_New" style="border: none;background-color: transparent;" 
             data-bs-toggle="tooltip" title="New" data-bs-placement="top"
-            @click="goToUserForm('0', 'new')">
+            @click="goToUserForm('0', 'new'); hideTooltip('btn_New')" @mouseover="hideTooltip('btn_New')">
               <i class="fa-solid fa-square-plus fa-2xl" style="color: rgb(66, 177, 202);"></i>
             </button>
         </div>
@@ -53,21 +55,23 @@
                     <th class="listTable1" style="background-color: rgb(66, 177, 202);">Currency</th>
                     <th class="listTable1" style="background-color: rgb(66, 177, 202);">Amount</th>
                     <th class="listTable1 text-start" style="background-color: rgb(66, 177, 202);">Status</th>
-                    <th class="listTable1" style="background-color: rgb(66, 177, 202);">To-do</th>
+                    <th class="listTable1" style="background-color: rgb(66, 177, 202);">Actions</th>
                 </tr>
             </thead>
             <tbody id="trxDetail">
-                <tr v-for="(item, index) in listdata" :key="index">
+                <tr v-for="(item, index) in filteredTransactions" :key="index">
                     <!-- <td><input type="checkbox"></td> -->
                     <td>{{ item.srcBrn }}</td>
                     <td>{{ item.refNo }}</td>
                     <td>{{ item.cifName }}</td>
                     <td>{{ item.currType }}</td>
-                    <td>{{ item.lcAmt }}</td>
+                    <td>{{ formatAmount(item.lcAmt) }}</td>
                     <td class="text-start">{{ getStatusDesc(item.trxStatus) }}</td>
                     <td>
                         <div class="dropdown">
-                            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button class="btn dropdown-toggle custom-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                &#8226;&#8226;&#8226;
+                            </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                 <li><button class="dropdown-item" @click="goToUserForm(item.id, 'inq')">Inquiry</button></li>
                                 <li><button class="dropdown-item" @click="goToUserForm(item.id, 'edt')">Edit</button></li>
@@ -100,6 +104,81 @@ export default {
             hasError: false,
             turnOffLoading: false,
             listdata: [],
+            filteredTransactions: [],
+            // listdata: [
+            //     {
+            //     "srcBrn": "1000",
+            //     "prcBrn": "1000",
+            //     "refNo": "1000007",
+            //     "refType": "LLC",
+            //     "cifName": "YTL Export Corp.",
+            //     "cifNo": "1800002",
+            //     "currType": "USD",
+            //     "trxStatus": "FullApp",
+            //     "lcType": "NLC",
+            //     "lcAmt": "8000.00",
+            //     "docIndex": "A1000006",
+            //     "appDate": "2025-03-19",
+            //     "appRcpDate": "2025-03-12",
+            //     "issDate": "2025-03-20",
+            //     "expDate": "2025-03-19",
+            //     "id": 2
+            //     },
+            //     {
+            //     "srcBrn": "1000",
+            //     "prcBrn": "1001",
+            //     "refNo": "1000002",
+            //     "refType": "LLC",
+            //     "cifName": "Trade Import Corp.",
+            //     "cifNo": "1800001",
+            //     "currType": "USD",
+            //     "trxStatus": "FullApp",
+            //     "lcType": "NLC",
+            //     "lcAmt": "16000.00",
+            //     "docIndex": "A1000002",
+            //     "appDate": "2025-03-06",
+            //     "appRcpDate": "2025-03-06",
+            //     "issDate": "2025-03-06",
+            //     "expDate": "2025-03-14",
+            //     "id": 3
+            //     },
+            //     {
+            //     "srcBrn": "1000",
+            //     "prcBrn": "1000",
+            //     "refNo": "1000001",
+            //     "refType": "LLC",
+            //     "cifName": "Trade Import Corp.",
+            //     "cifNo": "1800001",
+            //     "currType": "USD",
+            //     "trxStatus": "NewReg",
+            //     "lcType": "NLC",
+            //     "lcAmt": "6000.00",
+            //     "docIndex": "A1000001",
+            //     "appDate": "2025-03-11",
+            //     "appRcpDate": "2025-03-11",
+            //     "issDate": "2025-03-11",
+            //     "expDate": "2025-03-18",
+            //     "id": 4
+            //     },
+            //     {
+            //     "srcBrn": "1001",
+            //     "prcBrn": "1002",
+            //     "refNo": "1000003",
+            //     "refType": "LLC",
+            //     "cifName": "Trade Import Corp.",
+            //     "cifNo": "1800001",
+            //     "currType": "SGD",
+            //     "trxStatus": "NewReg",
+            //     "lcType": "NLC",
+            //     "lcAmt": "55000.00",
+            //     "docIndex": "A1000003",
+            //     "appDate": "2025-03-06",
+            //     "appRcpDate": "2025-03-06",
+            //     "issDate": "2025-03-06",
+            //     "expDate": "2025-03-14",
+            //     "id": 5
+            //     }
+            // ],
             currencyMap: {
                 USD: "USD - US Dollar",
                 SGD: "SGD - Singapore Dollar",
@@ -109,8 +188,29 @@ export default {
                 FullApp: "Fully Approved",
                 NewReg: "New Registration",
                 RegCan: "Registration Cancelled"
-            }
+            },
+            filter: {
+                refNo: "",
+                srcBrn: "",
+                trxStatus: ""
+            },
         } 
+    },
+    computed: {
+        // filterTransaction() {
+        //     if (!this.filter.refNo && !this.filter.srcBrn && !this.filter.trxStatus) {
+        //         console.log("here")
+        //         return this.listdata;
+        //     }
+        //     return this.listdata.filter((transaction) => {
+        //         console.log("here")
+        //         return (
+        //         (this.filter.refNo || transaction.refNo.includes(this.filter.refNo)) &&
+        //         (this.filter.srcBrn || transaction.srcBrn.includes(this.filter.srcBrn)) &&
+        //         (this.filter.trxStatus || transaction.trxStatus.includes(this.filter.trxStatus))
+        //         );
+        //     });
+        // },
     },
     created(){
 
@@ -136,7 +236,7 @@ export default {
             }else{
                 this.listdata = data.transaction;
                 this.hasError = false;
-                // console.log(this.listdata);
+                console.log(this.listdata);
                 this.$nextTick(() => {
                     this.turnOffLoading = true;
                 });
@@ -155,6 +255,38 @@ export default {
 
     },
     methods: {
+        hideTooltip(btn) {
+            const tooltipEl = document.getElementById(btn);
+            // const button = event.currentTarget;
+            const tooltip = bootstrap.Tooltip.getInstance(tooltipEl);
+            if (tooltip) {
+                tooltip.hide();
+            }
+        },
+        formatAmount(amount) {
+            if (amount == null) return "0.00"; // Handle undefined or null values
+            return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            .format(amount);
+        },
+        applyFilter() {
+            // if (!this.filter.refNo && !this.filter.srcBrn && !this.filter.trxStatus) {
+            //     return this.listdata;
+            // }
+            this.filteredTransactions = this.listdata.filter((transaction) => {
+                return (
+                (!this.filter.refNo || transaction.refNo.includes(this.filter.refNo)) &&
+                (!this.filter.srcBrn || transaction.srcBrn.includes(this.filter.srcBrn)) && 
+                (!this.filter.trxStatus || transaction.trxStatus.includes(this.filter.trxStatus))
+                );
+            });
+            // return this.listdata.filter((transaction) => {
+            //     return (
+            //     (this.filter.refNo || transaction.refNo.includes(this.filter.refNo)) &&
+            //     (this.filter.srcBrn || transaction.srcBrn.includes(this.filter.srcBrn)) &&
+            //     (this.filter.trxStatus || transaction.trxStatus.includes(this.filter.trxStatus))
+            //     );
+            // });
+        },
         goToUserForm(trxId, mode) {
             let modeDesc = "";
             toastr.options.closeButton = true;
@@ -219,5 +351,7 @@ export default {
 }
 </script>
 <style>
-    
+    .custom-dropdown-btn::after {
+        display: none !important;
+    }
 </style>

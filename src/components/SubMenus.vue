@@ -89,8 +89,15 @@ export default {
 }
 
 .subMenu h3 {
-
     padding-top: 2px;
     font-size: 15px;
+}
+
+span a {
+  text-decoration: none;
+}
+
+span a:hover {
+  text-decoration: underline;
 }
 </style>

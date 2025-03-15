@@ -141,7 +141,7 @@
             <a :href="button.href" data-bs-toggle="tooltip" 
             :title="button.title" :id="button.id" 
             data-bs-placement="left"
-            @click.prevent="handleButtonClick(button.id)">
+            @click.prevent="handleButtonClick(button.id); hideTooltip(button.id)" @mouseover="hideTooltip(button.id)">
                 <i :class="button.icon" aria-hidden="true"></i>
             </a>
         </div>
@@ -224,20 +224,20 @@ export default {
         disableExpDate: false,
         disableCurrType: false,
         disableLcAmt: false,
-        refNo: "100001",
-        cifNo: "110001",
-        cifName: "YTL Corp",
-        srcBrn: "1000",
-        prcBrn: "1001",
-        refType: "LLC",
-        lcType: "NLC",
-        docIndex: "100001",
-        appDate: "2025-03-19",
-        appRcpDate: "2025-03-19",
-        issDate: "2025-03-19",
-        expDate: "2025-03-20",
-        currType: "USD",
-        lcAmt: "8000.00",
+        refNo: "", //100001
+        cifNo: "", //110001
+        cifName: "", //YTL Corp
+        srcBrn: "", //1000
+        prcBrn: "", //1001
+        refType: "", //LLC
+        lcType: "", //NLC
+        docIndex: "", //100001
+        appDate: "", //2025-03-19
+        appRcpDate: "", //2025-03-19
+        issDate: "", //2025-03-19
+        expDate: "", //2025-03-20
+        currType: "", //USD
+        lcAmt: "", //8000.00
         isFabHidden: false, // Track FAB visibility
         isHideFab: false,
         turnOffLoading: false,
@@ -259,7 +259,7 @@ export default {
         },
       };
     },
-    computed: {
+    computed: {        
         visibleButtons() {
             return this.buttons.filter(button => {
                 // Always show buttons explicitly marked
@@ -408,6 +408,14 @@ export default {
       this.initBootstrapTooltips();
     },
     methods: {
+        hideTooltip(btn) {
+              const tooltipEl = document.getElementById(btn);
+              // const button = event.currentTarget;
+              const tooltip = bootstrap.Tooltip.getInstance(tooltipEl);
+              if (tooltip) {
+                  tooltip.hide();
+              }
+        },
         initBootstrapTooltips() {
           const tooltipTriggerList = [].slice.call(
             document.querySelectorAll('[data-bs-toggle="tooltip"]')
