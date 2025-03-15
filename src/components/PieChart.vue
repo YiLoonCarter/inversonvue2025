@@ -1,14 +1,16 @@
 <template>
     <div id="pie-container" class="text-center chart-container" v-bind:style="{ display: hasError ? 'none' : 'flex' }">
-        <div>
-            <h1 v-bind:style="{ display: hasError ? 'none' : 'block' }">Transactions by Count</h1>
-            <svg id="pie-chart-count" ></svg>
-            <div id="tooltip-count" class="tooltip-chart"></div>
-        </div>
-        <div>
-            <h1 v-bind:style="{ display: hasError ? 'none' : 'block' }">Transactions by LC Amount</h1>
-            <svg id="pie-chart-amount"></svg>
-            <div id="tooltip-amount" class="tooltip-chart"></div>
+        <div class="row">
+            <div class="col-md-6 g-3">
+                <h1 v-bind:style="{ display: hasError ? 'none' : 'block' }">Transactions by Count</h1>
+                <svg id="pie-chart-count" ></svg>
+                <div id="tooltip-count" class="tooltip-chart"></div>
+            </div>
+            <div class="col-md-6 g-3">
+                <h1 v-bind:style="{ display: hasError ? 'none' : 'block' }">Transactions by LC Amount</h1>
+                <svg id="pie-chart-amount"></svg>
+                <div id="tooltip-amount" class="tooltip-chart"></div>
+            </div>
         </div>
     </div>
 </template>
