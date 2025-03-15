@@ -235,6 +235,7 @@ export default {
                 });
             }else{
                 this.listdata = data.transaction;
+                this.filteredTransactions = this.listdata;
                 this.hasError = false;
                 console.log(this.listdata);
                 this.$nextTick(() => {
